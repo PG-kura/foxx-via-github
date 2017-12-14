@@ -1,4 +1,5 @@
 'use strict';
+const db = require('@arangodb').db;
 const joi = require('joi');
 const createAuth = require('@arangodb/foxx/auth');
 const createRouter = require('@arangodb/foxx/router');
@@ -6,17 +7,22 @@ const sessionsMiddleware = require('@arangodb/foxx/sessions');
 
 const auth = createAuth();
 const router = createRouter();
-const users = module.context.collection('users');
-const sessions = sessionsMiddleware({
-  storage: module.context.collection('sessions'),
-  transport: 'cookie'
-});
-module.context.use(sessions);
+const users = module.context.collectionName('Users');
+
+if (module.context.collectionPrefix !== 'internal_') {
+  const sessions = sessionsMiddleware({
+    storage: module.context.collection('Sessions'),
+    transport: ['header', 'cookie']
+  });
+
+  module.context.use(sessions);
+
+}
 module.context.use(router);
 
 router.get('/whoami', function (req, res) {
   try {
-    const user = users.document(req.session.uid);
+    const user = db._collection(users).document(req.session.uid);
     res.send({username: user.username});
   } catch (e) {
     res.send({username: null});
@@ -26,7 +32,7 @@ router.get('/whoami', function (req, res) {
 
 router.post('/login', function (req, res) {
   // This may return a user object or null
-  const user = users.firstExample({
+  const user = db._collection(users).firstExample({
     username: req.body.username
   });
   const valid = auth.verify(
@@ -35,7 +41,9 @@ router.post('/login', function (req, res) {
     req.body.password
   );
   if (!valid) res.throw('unauthorized');
+  
   // Log the user in
+  
   req.session.uid = user._key;
   req.sessionStorage.save(req.session);
   res.send({sucess: true});
@@ -61,7 +69,8 @@ router.post('/signup', function (req, res) {
     // Create an authentication hash
     user.authData = auth.create(user.password);
     delete user.password;
-    const meta = users.save(user);
+    console.log(user);
+    const meta = db._collection(users).save(user);
     Object.assign(user, meta);
   } catch (e) {
     // Failed to save the user
