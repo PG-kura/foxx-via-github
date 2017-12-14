@@ -5,7 +5,7 @@ const router = createRouter();
 module.context.use(router);
 
 router.get('/hello-world', function (req, res) {
-  res.send('Hello World! 2!!!');
+  res.send('Hello World! 3!!!');
 })
 .response(['text/plain'], 'A generic greeting.')
 .summary('Generic greeting')
