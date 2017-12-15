@@ -7,36 +7,33 @@ const sessionsMiddleware = require('@arangodb/foxx/sessions');
 
 const auth = createAuth();
 const router = createRouter();
-const users = module.context.collectionName('Users');
+const users_colname = module.context.collectionName('Users');
+const sessions_colname = module.context.collectionName('Sessions');
 
 
-
-
-if (!db._collection(users)) {
-  db._createDocumentCollection(users);
+if (!db._collection(users_colname)) {
+  db._createDocumentCollection(users_colname);
 }
-
-db._collection(users).ensureIndex({
+db._collection(users_colname).ensureIndex({
   type: 'hash',
   fields: ['username'],
   unique: true
 });
 
-if (!db._collection("Sessions")) {
-  db._createDocumentCollection("Sessions");
+if(!db._collection(sessions_colname)) {
+  db._createDocumentCollection(sessions_colname);
 }
 const sessions = sessionsMiddleware({
-  storage: module.context.collection('Sessions'),
+  storage: module.context.collection(sessions_colname),
   transport: ['header', 'cookie']
 });
 
 module.context.use(sessions);
-
 module.context.use(router);
 
 router.get('/whoami', function (req, res) {
   try {
-    const user = db._collection(users).document(req.session.uid);
+    const user = db._collection(users_colname).document(req.session.uid);
     res.send({username: user.username});
   } catch (e) {
     res.send({username: null});
@@ -46,7 +43,7 @@ router.get('/whoami', function (req, res) {
 
 router.post('/login', function (req, res) {
   // This may return a user object or null
-  const user = db._collection(users).firstExample({
+  const user = db._collection(users_colname).firstExample({
     username: req.body.username
   });
   const valid = auth.verify(
