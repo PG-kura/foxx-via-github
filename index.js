@@ -23,7 +23,7 @@ if(!db._collection(sessions_colname)) {
   db._createDocumentCollection(sessions_colname);
 }
 const sessions = sessionsMiddleware({
-  storage: module.context.collection(sessions_colname),
+  storage: module.context.collection('Sessions'),
   transport: ['header', 'cookie']
 });
 
