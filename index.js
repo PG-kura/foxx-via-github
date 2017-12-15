@@ -10,6 +10,8 @@ const router = createRouter();
 const users_colname = module.context.collectionName('Users');
 const sessions_colname = module.context.collectionName('Sessions');
 
+throw users_colname;
+
 
 if (!db._collection(users_colname)) {
   db._createDocumentCollection(users_colname);
