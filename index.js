@@ -22,20 +22,15 @@ db._collection(users).ensureIndex({
   unique: true
 });
 
-
-if (module.context.collectionPrefix !== 'internal_') {
-  const sessions = sessionsMiddleware({
-    storage: module.context.collection('Sessions'),
-    transport: ['header', 'cookie']
-  });
-
-  module.context.use(sessions);
+if (!db._collection("Sessions")) {
+  db._createDocumentCollection("Sessions");
 }
-/*
-if (!db._collection(sessions)) {
-  db._createDocumentCollection(sessions);
-}
-*/
+const sessions = sessionsMiddleware({
+  storage: module.context.collection('Sessions'),
+  transport: ['header', 'cookie']
+});
+
+module.context.use(sessions);
 
 module.context.use(router);
 
