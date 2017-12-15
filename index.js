@@ -10,7 +10,7 @@ const router = createRouter();
 const users = module.context.collectionName('Users');
 
 
-sessions = module.context.collectionName('sessions');
+const sessions = module.context.collectionName('Sessions');
 
 if (!db._collection(sessions)) {
   db._createDocumentCollection(sessions);
@@ -29,7 +29,7 @@ db._collection(users).ensureIndex({
 
 if (module.context.collectionPrefix !== 'internal_') {
   sessions = sessionsMiddleware({
-    storage: module.context.collection('sessions'),
+    storage: module.context.collection('Sessions'),
     transport: ['header', 'cookie']
   });
 
