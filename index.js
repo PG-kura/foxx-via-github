@@ -10,11 +10,7 @@ const router = createRouter();
 const users = module.context.collectionName('Users');
 
 
-const sessions = module.context.collectionName('Sessions');
 
-if (!db._collection(sessions)) {
-  db._createDocumentCollection(sessions);
-}
 
 if (!db._collection(users)) {
   db._createDocumentCollection(users);
@@ -28,14 +24,19 @@ db._collection(users).ensureIndex({
 
 
 if (module.context.collectionPrefix !== 'internal_') {
-  sessions = sessionsMiddleware({
+  const sessions = sessionsMiddleware({
     storage: module.context.collection('Sessions'),
     transport: ['header', 'cookie']
   });
 
   module.context.use(sessions);
-
 }
+/*
+if (!db._collection(sessions)) {
+  db._createDocumentCollection(sessions);
+}
+*/
+
 module.context.use(router);
 
 router.get('/whoami', function (req, res) {
