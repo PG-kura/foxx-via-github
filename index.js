@@ -9,6 +9,24 @@ const auth = createAuth();
 const router = createRouter();
 const users = module.context.collectionName('Users');
 
+
+const sessions = module.context.collectionName('sessions');
+
+if (!db._collection(sessions)) {
+  db._createDocumentCollection(sessions);
+}
+
+if (!db._collection(users)) {
+  db._createDocumentCollection(users);
+}
+
+db._collection(users).ensureIndex({
+  type: 'hash',
+  fields: ['username'],
+  unique: true
+});
+
+
 if (module.context.collectionPrefix !== 'internal_') {
   const sessions = sessionsMiddleware({
     storage: module.context.collection('Sessions'),
